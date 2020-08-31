@@ -1,0 +1,71 @@
+﻿@model IEnumerable<Bcf.Models.Player>
+
+@{
+    ViewData["Title"] = "Index";
+}
+
+<h1>Index</h1>
+
+<p>
+    <a asp-action="Create">Ajouter un joueur</a>
+</p>
+
+<form asp-controller="Players" asp-action="Index" method="get">
+    <p>
+        <input type="text" name="SearchString" placeholder="Rechercher par nom">
+        <input type="submit" value="Filtrer" />
+    </p>
+</form>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.FullName)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Position)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Number)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Height)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Weight)
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var player in Model)
+        {
+            <tr>
+                <td>
+                    <a href="@Url.Action("Details", "Players", new { Id = player.Id })">
+                        <img src="@Url.Content("~/images/" + @player.ProfilePicture)"  class="rounded-circle player-picture-thumb" asp-append-version="true"/>
+                    </a>
+                    @Html.ActionLink(player.FullName, "Details", "Players", new { Id = player.Id }, null)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => player.Position)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => player.Number)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => player.Height)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => player.Weight)
+                </td>
+                <td>
+                    <a asp-action="Edit" asp-route-id="@player.Id">Editer</a> |
+                    <a asp-action="Details" asp-route-id="@player.Id">Infos</a> |
+                    <a asp-action="Delete" asp-route-id="@player.Id">Supprimer</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
