@@ -1,58 +1,48 @@
-﻿using System;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Bcf.Data;
 using Bcf.Models;
-using Microsoft.AspNetCore.Hosting;
 using Bcf.ViewModels;
-using System.IO;
-using System.Reflection;
-using System.ComponentModel.DataAnnotations;
+using Bcf.Interfaces;
+using Bcf.Services;
+using System.Collections.Generic;
 
 namespace Bcf.Controllers
 {
     public class PlayersController : Controller
     {
-        private readonly BcfContext _context;
-        private readonly IWebHostEnvironment _webHostEnvironment;
+        private readonly IPlayerRepository _playerRepository;
+        private readonly IPlayerService _playerService;
 
-        public PlayersController(BcfContext context, IWebHostEnvironment hostEnvironment)
+        public PlayersController(IPlayerRepository playerRepository, IPlayerService playerService)
         {
-            _context = context;
-            _webHostEnvironment = hostEnvironment;
+            _playerRepository = playerRepository;
+            _playerService = playerService;
         }
 
         // GET: Players
-        public async Task<IActionResult> Index(string searchString)
+        public async Task<IActionResult> Index(string searchString = "")
         {
-            var players = from plrs in _context.Players select plrs;
+            List<Player> players = await _playerRepository.ListAsync(searchString);
 
-            if (!String.IsNullOrEmpty(searchString))
-            {
-                players = players.Where(s => s.LastName.Contains(searchString) || s.FirstName.Contains(searchString));
-            }
-
-            return View(await players.ToListAsync());
+            return View(_playerService.CreateListIndexPlayerViewModel(players));
         }
 
         // GET: Players/Details/5
         public async Task<IActionResult> Details(int? id)
         {
-            if (id == null)
+            if (!id.HasValue)
             {
                 return NotFound();
             }
 
-            var player = await _context.Players
-                .FirstOrDefaultAsync(m => m.Id == id);
+            Player player = await _playerRepository.GetByIdAsync(id.Value);
+
             if (player == null)
             {
                 return NotFound();
             }
-
-            return View(player);
+            return View(_playerService.CreateDetailsPlayerViewModel(player));
         }
 
         // GET: Players/Create
@@ -66,47 +56,32 @@ namespace Bcf.Controllers
         // more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(PlayerViewModel model/*[Bind("Id,FirstName,LastName,Position,Number,Height,Weight,NickName,BirthDate")] Player model*/)
+        public async Task<IActionResult> Create(PlayerViewModel playerVM)
         {
             if (ModelState.IsValid)
-            {
-                string uniqueFileName = UploadedFile(model);
-
-                Player player = new Player()
-                {
-                    Id = model.Id,
-                    FirstName = model.FirstName,
-                    LastName = model.LastName,
-                    BirthDate = model.BirthDate,
-                    Height = model.Height,
-                    Weight = model.Weight,
-                    NickName = model.NickName,
-                    Number = model.Number,
-                    Position = model.Position,
-                    ProfilePicture = uniqueFileName
-                };
-                _context.Add(player);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+            {                
+                _playerService.UploadProfilImage(playerVM);
+                await _playerRepository.AddAsync(_playerService.Clone(playerVM));
+                return RedirectToAction(actionName: nameof(Index));
             }
-            return View(model);
+            return View(playerVM);
         }
 
         // GET: Players/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
-            if (id == null)
+            if (!id.HasValue)
             {
                 return NotFound();
             }
 
-            Player player = await _context.Players.FindAsync(id);
+            Player player = await _playerRepository.GetByIdAsync(id.Value);
 
             if (player == null)
             {
                 return NotFound();
             }
-            return View(player);
+            return View(_playerService.CreateViewModel(player));
         }
 
         // POST: Players/Edit/5
@@ -114,9 +89,9 @@ namespace Bcf.Controllers
         // more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,FirstName,LastName,FullName,Position,Number,Height,Weight,NickName,BirthDate,ProfilePicture")] Player player)
+        public async Task<IActionResult> Edit(int id, PlayerViewModel playerVM)
         {
-            if (id != player.Id)
+            if (id != playerVM.Id)
             {
                 return NotFound();
             }
@@ -125,12 +100,17 @@ namespace Bcf.Controllers
             {
                 try
                 {
-                    _context.Update(player);
-                    await _context.SaveChangesAsync();
+                    //Player player = await _playerRepository.GetByIdAsync(playerVM.Id);
+
+                    _playerService.UploadProfilImage(playerVM);
+
+                    Player player = _playerService.Clone(playerVM);
+
+                    await _playerRepository.UpdateAsync(player);
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!PlayerExists(player.Id))
+                    if (!_playerRepository.Exist(playerVM.Id))
                     {
                         return NotFound();
                     }
@@ -139,9 +119,9 @@ namespace Bcf.Controllers
                         throw;
                     }
                 }
-                return RedirectToAction(nameof(Index));
+                return RedirectToAction(actionName: nameof(Index));
             }
-            return View(player);
+            return View(playerVM);
         }
 
         // GET: Players/Delete/5
@@ -152,14 +132,13 @@ namespace Bcf.Controllers
                 return NotFound();
             }
 
-            var player = await _context.Players
-                .FirstOrDefaultAsync(m => m.Id == id);
+            Player player = await _playerRepository.GetByIdAsync(id.Value);
+
             if (player == null)
             {
                 return NotFound();
             }
-
-            return View(player);
+            return View(_playerService.CreateDeletePlayerViewModel(player));
         }
 
         // POST: Players/Delete/5
@@ -167,46 +146,15 @@ namespace Bcf.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var player = await _context.Players.FindAsync(id);
-            _context.Players.Remove(player);
-            await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
-        }
+            Player player = await _playerRepository.GetByIdAsync(id);
 
-        private bool PlayerExists(int id)
-        {
-            return _context.Players.Any(e => e.Id == id);
-        }
-
-        private string UploadedFile(PlayerViewModel model)
-        {
-            string uniqueFileName = null;
-
-            if (model.ProfileImage != null)
+            if (player == null)
             {
-                string uploadsFolder = Path.Combine(_webHostEnvironment.WebRootPath, "images");
-
-                uniqueFileName = Guid.NewGuid().ToString() + "_" + model.ProfileImage.FileName;
-
-                string filePath = Path.Combine(uploadsFolder, uniqueFileName);
-
-                using (var fileStream = new FileStream(filePath, FileMode.Create))
-                {
-                    model.ProfileImage.CopyTo(fileStream);
-                }
+                return NotFound();
             }
-            return uniqueFileName;
-        }
-    }
-    public static class EnumExtensions
-    {
-        public static string GetDisplayName(this Enum enumValue)
-        {
-            return enumValue.GetType()
-                            .GetMember(enumValue.ToString())
-                            .First()
-                            .GetCustomAttribute<DisplayAttribute>()
-                            .GetName();
+            await _playerRepository.DeleteAsync(player);
+            _playerService.DeleteProfilImage(player);
+            return RedirectToAction(nameof(Index));
         }
     }
 }

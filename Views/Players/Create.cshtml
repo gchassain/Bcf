@@ -1,12 +1,12 @@
 ﻿@model Bcf.ViewModels.PlayerViewModel
 
 @{
-    ViewData["Title"] = "Create";
+    ViewData["Title"] = "Création";
 }
 
-<h1>Create</h1>
+<h1>Ajouter un joueur</h1>
 
-<h4>Player</h4>
+<h4>Joueur</h4>
 <hr />
 <div class="row">
     <div class="col-md-4">
@@ -24,7 +24,6 @@
             </div>
             <div class="form-group">
                 <label asp-for="Position" class="control-label"></label>
-                <!--<input asp-for="Position" class="form-control" />-->
                 <select asp-for="Position" asp-items="Html.GetEnumSelectList<Enums.PlayerPositionsEnum>()" class="form-control">
                     <option selected="selected" value="none" disabled hidden></option>
                 </select>
@@ -58,8 +57,8 @@
             <div class="form-group">
                 <label asp-for="ProfileImage" class="control-label"></label>
                 <div class="custom-file">
-                    <input asp-for="ProfileImage" class="custom-file-input" id="customFile">
-                    <label class="custom-file-label" for="customFile">Choose file</label>
+                    <input asp-for="ProfileImage" class="custom-file-input" id="customFile" accept="image/*" type="file">
+                    <label class="custom-file-label" for="customFile">Importer photo</label>
                 </div>
                 <span asp-validation-for="ProfileImage" class="text-danger"></span>
             </div>
@@ -71,7 +70,7 @@
 </div>
 
 <div>
-    <a asp-action="Index">Back to List</a>
+    <a asp-action="Index">Annuler</a>
 </div>
 
 @section Scripts {

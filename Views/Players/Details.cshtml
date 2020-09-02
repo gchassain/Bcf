@@ -1,4 +1,4 @@
-﻿@model Bcf.Models.Player
+﻿@model Bcf.ViewModels.DetailsPlayerViewModel
 
 @{
     ViewData["Title"] = "Details";
@@ -21,10 +21,7 @@
                 @Html.DisplayFor(model => model.Position)
             </dd>
             <dd class="col-sm-10">
-                @Html.DisplayFor(model => model.Height)
-            </dd>
-            <dd class="col-sm-10">
-                @Html.DisplayFor(model => model.Weight)
+                @Html.DisplayFor(model => model.Weight) / @Html.DisplayFor(model => model.Height)
             </dd>
             <dd class="col-sm-10">
                 @Html.DisplayFor(model => model.BirthDate)

@@ -5,6 +5,13 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.EntityFrameworkCore;
 using Bcf.Data;
+using Bcf.Interfaces;
+using Bcf.Services;
+using System;
+using System.Threading.Tasks;
+using Bcf.Models;
+using System.Linq;
+using System.Collections.Generic;
 
 namespace Bcf
 {
@@ -22,14 +29,19 @@ namespace Bcf
         {
             services.AddControllersWithViews();
             services.AddDbContext<BcfContext>(options => options.UseSqlServer(Configuration.GetConnectionString("BcfContext")));
+            services.AddScoped<IPlayerRepository, EFPlayerRepository>();
+            services.AddScoped<IPlayerService, PlayerService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, IServiceProvider serviceProvider)
         {
             if (env.IsDevelopment())
             {
-                app.UseDeveloperExceptionPage();
+                //app.UseDeveloperExceptionPage();
+                var repository = serviceProvider.GetRequiredService<IPlayerRepository>();
+
+                InitializeDatabaseAsync(repository).Wait();
             }
             else
             {
@@ -50,6 +62,33 @@ namespace Bcf
                     name: "default",
                     pattern: "{controller=Home}/{action=Index}/{id?}");
             });
+        }
+
+        public async Task InitializeDatabaseAsync(IPlayerRepository repo)
+        {
+            List<Player> players = await repo.ListAsync("");
+
+            if (!players.Any())
+            {
+                await repo.AddAsync(GetPlayerTest());
+            }
+        }
+
+        public static Player GetPlayerTest()
+        {
+            Player player = new Player
+            {
+                FirstName = "LeBron",
+                LastName = "James",
+                NickName = "The king",
+                Height = 206,
+                Weight = 113,
+                BirthDate = new DateTime(1984, 12, 30),
+                Number = 23,
+                Position = Enums.PlayerPositionsEnum.POWER_FORWARD,
+                ProfilePicture = "lebron-james.png"
+            };
+            return player;
         }
     }
 }
