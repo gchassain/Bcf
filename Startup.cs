@@ -30,7 +30,6 @@ namespace Bcf
             services.AddControllersWithViews();
             services.AddDbContext<BcfContext>(options => options.UseSqlServer(Configuration.GetConnectionString("BcfContext")));
             services.AddScoped<IPlayerRepository, EFPlayerRepository>();
-            services.AddScoped<IPlayerService, PlayerService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

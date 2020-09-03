@@ -4,28 +4,44 @@ using Microsoft.EntityFrameworkCore;
 using Bcf.Models;
 using Bcf.ViewModels;
 using Bcf.Interfaces;
-using Bcf.Services;
 using System.Collections.Generic;
+using System;
+using Microsoft.AspNetCore.Hosting;
+using System.IO;
 
 namespace Bcf.Controllers
 {
     public class PlayersController : Controller
     {
         private readonly IPlayerRepository _playerRepository;
-        private readonly IPlayerService _playerService;
+        private readonly IWebHostEnvironment _webHostEnvironment;
 
-        public PlayersController(IPlayerRepository playerRepository, IPlayerService playerService)
+        public PlayersController(IPlayerRepository playerRepository, IWebHostEnvironment webHostEnvironment)
         {
             _playerRepository = playerRepository;
-            _playerService = playerService;
-        }
+            _webHostEnvironment = webHostEnvironment;
+    }
 
         // GET: Players
         public async Task<IActionResult> Index(string searchString = "")
         {
             List<Player> players = await _playerRepository.ListAsync(searchString);
+            List<IndexPlayerViewModel> playersVM = new List<IndexPlayerViewModel>();
 
-            return View(_playerService.CreateListIndexPlayerViewModel(players));
+            foreach (Player player in players)
+            {
+                playersVM.Add(new IndexPlayerViewModel()
+                {
+                    Id = player.Id,
+                    FullName = player.FullName,
+                    Height = player.Height / 100,
+                    Weight = player.Weight,
+                    Number = player.Number,
+                    Position = player.Position,
+                    ProfilePicture = player.ProfilePicture
+                });
+            }
+            return View(playersVM);
         }
 
         // GET: Players/Details/5
@@ -42,7 +58,19 @@ namespace Bcf.Controllers
             {
                 return NotFound();
             }
-            return View(_playerService.CreateDetailsPlayerViewModel(player));
+
+            DetailsPlayerViewModel detailsPlayerVM = new DetailsPlayerViewModel()
+            {
+                Id = player.Id,
+                FullName = player.FullName,
+                Height = player.Height / 100,
+                Weight = player.Weight,
+                Number = player.Number,
+                Position = player.Position,
+                ProfilePicture = player.ProfilePicture,
+                BirthDate = player.BirthDate
+            };
+            return View(detailsPlayerVM);
         }
 
         // GET: Players/Create
@@ -60,8 +88,21 @@ namespace Bcf.Controllers
         {
             if (ModelState.IsValid)
             {                
-                _playerService.UploadProfilImage(playerVM);
-                await _playerRepository.AddAsync(_playerService.Clone(playerVM));
+                UploadProfilImage(playerVM);
+                Player player = new Player()
+                {
+                    Id = playerVM.Id,
+                    FirstName = playerVM.FirstName,
+                    LastName = playerVM.LastName,
+                    Height = playerVM.Height,
+                    Weight = playerVM.Weight,
+                    Position = playerVM.Position,
+                    BirthDate = playerVM.BirthDate,
+                    NickName = playerVM.NickName,
+                    Number = playerVM.Number,
+                    ProfilePicture = playerVM.ProfilePicture
+                };
+                await _playerRepository.AddAsync(player);
                 return RedirectToAction(actionName: nameof(Index));
             }
             return View(playerVM);
@@ -81,7 +122,20 @@ namespace Bcf.Controllers
             {
                 return NotFound();
             }
-            return View(_playerService.CreateViewModel(player));
+            PlayerViewModel playerViewModel = new PlayerViewModel
+            {
+                Id = player.Id,
+                BirthDate = player.BirthDate,
+                FirstName = player.FirstName,
+                LastName = player.LastName,
+                Height = player.Height,
+                Weight = player.Weight,
+                NickName = player.NickName,
+                Number = player.Number,
+                Position = player.Position,
+                ProfilePicture = player.ProfilePicture
+            };
+            return View(playerViewModel);
         }
 
         // POST: Players/Edit/5
@@ -100,12 +154,20 @@ namespace Bcf.Controllers
             {
                 try
                 {
-                    //Player player = await _playerRepository.GetByIdAsync(playerVM.Id);
-
-                    _playerService.UploadProfilImage(playerVM);
-
-                    Player player = _playerService.Clone(playerVM);
-
+                    UploadProfilImage(playerVM);
+                    Player player = new Player()
+                    {
+                        Id = playerVM.Id,
+                        FirstName = playerVM.FirstName,
+                        LastName = playerVM.LastName,
+                        Height = playerVM.Height,
+                        Weight = playerVM.Weight,
+                        Position = playerVM.Position,
+                        BirthDate = playerVM.BirthDate,
+                        NickName = playerVM.NickName,
+                        Number = playerVM.Number,
+                        ProfilePicture = playerVM.ProfilePicture
+                    };
                     await _playerRepository.UpdateAsync(player);
                 }
                 catch (DbUpdateConcurrencyException)
@@ -138,7 +200,13 @@ namespace Bcf.Controllers
             {
                 return NotFound();
             }
-            return View(_playerService.CreateDeletePlayerViewModel(player));
+
+            DeletePlayerViewModel deletePlayerViewModel = new DeletePlayerViewModel()
+            {
+                Id = player.Id,
+                FullName = player.FullName
+            };
+            return View(deletePlayerViewModel);
         }
 
         // POST: Players/Delete/5
@@ -153,8 +221,67 @@ namespace Bcf.Controllers
                 return NotFound();
             }
             await _playerRepository.DeleteAsync(player);
-            _playerService.DeleteProfilImage(player);
+            DeleteProfilImage(player);
             return RedirectToAction(nameof(Index));
+        }
+
+        /// <summary>
+        /// Upload dans le répertoir image une image avec un nom unique
+        /// </summary>
+        /// <param name="playerVM">Le player model</param>
+        private void UploadProfilImage(PlayerViewModel playerVM)
+        {
+            string uniqueFileName = GetUniqueFileName(playerVM);
+
+            if (uniqueFileName != null)
+            {
+                string uploadsFolder = Path.Combine(_webHostEnvironment.WebRootPath, "images");
+                string filePath = Path.Combine(uploadsFolder, uniqueFileName);
+
+                using (var fileStream = new FileStream(filePath, FileMode.Create))
+                {
+                    playerVM.ProfileImage.CopyTo(fileStream);
+                }
+                playerVM.ProfilePicture = uniqueFileName;
+            }
+        }
+
+        /// <summary>
+        /// Géère un nom de fichier unique
+        /// </summary>
+        /// <param name="model">Le modèle contenant l'object FormFile</param>
+        /// <returns>Un nom de fichier unique</returns>
+        private string GetUniqueFileName(PlayerViewModel model)
+        {
+            if (model.ProfileImage == null)
+            {
+                return null;
+            }
+            return $"{ Guid.NewGuid()}_{ model.ProfileImage.FileName }";
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="player"></param>
+        private void DeleteProfilImage(Player player)
+        {
+            try
+            {
+                string path = Path.Combine(_webHostEnvironment.WebRootPath, "images", player.ProfilePicture ?? string.Empty);
+
+                // Check if file exists with its full path    
+                if (!System.IO.File.Exists(path))
+                {
+                    return;
+                }
+                // If file found, delete it    
+                System.IO.File.Delete(path);
+            }
+            catch (IOException ioExp)
+            {
+                throw ioExp;
+            }
         }
     }
 }
