@@ -37,7 +37,7 @@ namespace Bcf
             if (env.IsDevelopment())
             {
                 //app.UseDeveloperExceptionPage();
-                var repository = serviceProvider.GetRequiredService<IPlayerRepository>();
+                IPlayerRepository repository = serviceProvider.GetRequiredService<IPlayerRepository>();
 
                 InitializeDatabaseAsync(repository).Wait();
             }
@@ -68,25 +68,41 @@ namespace Bcf
 
             if (!players.Any())
             {
-                await repo.AddAsync(GetPlayerTest());
+                await repo.SaveChangeAsync(GetPlayersTest());
+               // await repo.AddAsync(GetPlayersTest());
             }
         }
 
-        public static Player GetPlayerTest()
+        public static List<Player> GetPlayersTest()
         {
-            Player player = new Player
+            List<Player> players = new List<Player>
             {
-                FirstName = "LeBron",
-                LastName = "James",
-                NickName = "The king",
-                Height = 206,
-                Weight = 113,
-                BirthDate = new DateTime(1984, 12, 30),
-                Number = 23,
-                Position = Enums.PlayerPositionsEnum.POWER_FORWARD,
-                ProfilePicture = "lebron-james.png"
+                new Player()
+                {
+                    FirstName = "Michael",
+                    LastName = "Jordan",
+                    NickName = "His Airness",
+                    Height = 198,
+                    Weight = 98,
+                    BirthDate = new DateTime(1963, 02, 17),
+                    Number = 23,
+                    Position = Enums.PlayerPositionsEnum.SMALL_FORWARD,
+                    ProfilePicture = "michael-jordan.png"
+                },
+                new Player()
+                {
+                    FirstName = "LeBron",
+                    LastName = "James",
+                    NickName = "The king",
+                    Height = 206,
+                    Weight = 113,
+                    BirthDate = new DateTime(1984, 12, 30),
+                    Number = 23,
+                    Position = Enums.PlayerPositionsEnum.POWER_FORWARD,
+                    ProfilePicture = "lebron-james.png"
+                }
             };
-            return player;
+            return players;
         }
     }
 }

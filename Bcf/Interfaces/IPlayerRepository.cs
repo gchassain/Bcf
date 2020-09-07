@@ -12,5 +12,6 @@ namespace Bcf.Interfaces
         Task UpdateAsync(Player player);
         Task DeleteAsync(Player player);
         bool Exist(int id);
+        Task SaveChangeAsync(List<Player> players);
     }
 }

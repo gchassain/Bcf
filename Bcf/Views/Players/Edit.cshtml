@@ -13,6 +13,10 @@
         <form enctype="multipart/form-data" asp-action="Edit">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <input type="hidden" asp-for="Id" />
+            <div class="player-info-img">
+                <img src="@Url.Content("~/images/" + @Model.ProfilePicture)" class="player-info-img" />
+                <input type="hidden" asp-for="ProfilePicture" class="form-control" />
+            </div>
             <div class="form-group">
                 <label asp-for="FirstName" class="control-label"></label>
                 <input asp-for="FirstName" class="form-control" />
@@ -55,7 +59,13 @@
                 <input asp-for="BirthDate" class="form-control" />
                 <span asp-validation-for="BirthDate" class="text-danger"></span>
             </div>
+
             <div class="form-group">
+                <label asp-for="ProfileImage" class="control-label"></label>
+                <input asp-for="ProfileImage" class="form-control" />
+                <span asp-validation-for="ProfileImage" class="text-danger"></span>
+            </div>
+            @*<div class="form-group">
                 <label asp-for="ProfileImage" class="control-label"></label>
                 <img src="@Url.Content("~/images/" + @Model.ProfilePicture)" class="player-info-img" />
                 <div class="custom-file">
@@ -63,8 +73,8 @@
                     <label class="custom-file-label" for="customFile">Modifier la photo</label>
                 </div>
                 <span asp-validation-for="ProfileImage" class="text-danger"></span>
-            </div>
-            
+            </div>*@
+
             <div class="form-group">
                 <input type="submit" value="Save" class="btn btn-primary" />
             </div>

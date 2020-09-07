@@ -50,6 +50,12 @@ namespace Bcf.Data
                 .ToListAsync();
         }
 
+        public Task SaveChangeAsync(List<Player> players)
+        {
+            _dbContext.Players.AddRange(players);
+            return _dbContext.SaveChangesAsync();
+        }
+
         public Task UpdateAsync(Player player)
         {
             _dbContext.Entry(player).State = EntityState.Modified;
