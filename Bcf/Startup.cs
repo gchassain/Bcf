@@ -6,7 +6,6 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.EntityFrameworkCore;
 using Bcf.Data;
 using Bcf.Interfaces;
-using Bcf.Services;
 using System;
 using System.Threading.Tasks;
 using Bcf.Models;
@@ -29,7 +28,7 @@ namespace Bcf
         {
             services.AddControllersWithViews();
             services.AddDbContext<BcfContext>(options => options.UseSqlServer(Configuration.GetConnectionString("BcfContext")));
-            services.AddScoped<IPlayerRepository, EFPlayerRepository>();
+            services.AddScoped<IPlayerRepository, PlayerRepository>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

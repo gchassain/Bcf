@@ -52,25 +52,32 @@ namespace Bcf.Controllers
                 return NotFound();
             }
 
-            Player player = await _playerRepository.GetByIdAsync(id.Value);
-
-            if (player == null)
+            try
             {
-                return NotFound();
+                Player player = await _playerRepository.GetByIdAsync(id.Value);
+
+                if (player == null)
+                {
+                    return NotFound();
+                }
+
+                DetailsPlayerViewModel detailsPlayerVM = new DetailsPlayerViewModel()
+                {
+                    Id = player.Id,
+                    FullName = player.FullName,
+                    Height = player.Height / 100,
+                    Weight = player.Weight,
+                    Number = player.Number,
+                    Position = player.Position,
+                    ProfilePicture = player.ProfilePicture,
+                    BirthDate = player.BirthDate
+                };
+                return View(detailsPlayerVM);
             }
-
-            DetailsPlayerViewModel detailsPlayerVM = new DetailsPlayerViewModel()
+            catch (Exception ex)
             {
-                Id = player.Id,
-                FullName = player.FullName,
-                Height = player.Height / 100,
-                Weight = player.Weight,
-                Number = player.Number,
-                Position = player.Position,
-                ProfilePicture = player.ProfilePicture,
-                BirthDate = player.BirthDate
-            };
-            return View(detailsPlayerVM);
+                return BadRequest(ex);
+            }
         }
 
         // GET: Players/Create
@@ -268,7 +275,7 @@ namespace Bcf.Controllers
         {
             try
             {
-                string path = Path.Combine(_webHostEnvironment.WebRootPath, "images", player.ProfilePicture ?? string.Empty);
+                string path = Path.Combine(_webHostEnvironment?.WebRootPath, "images", player.ProfilePicture ?? string.Empty);
 
                 // Check if file exists with its full path    
                 if (!System.IO.File.Exists(path))

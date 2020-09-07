@@ -7,11 +7,11 @@ using System.Threading.Tasks;
 
 namespace Bcf.Data
 {
-    public class EFPlayerRepository : IPlayerRepository
+    public class PlayerRepository : IPlayerRepository
     {
         private readonly BcfContext _dbContext;
 
-        public EFPlayerRepository(BcfContext bcfContext)
+        public PlayerRepository(BcfContext bcfContext)
         {
             _dbContext = bcfContext;
         }
