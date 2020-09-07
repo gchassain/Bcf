@@ -46,10 +46,10 @@ namespace Bcf.Tests.ControllersTests.PlayersControllerTests
         public void Create_Get_ShouldHaveNo_ViewModel()
         {
             // Act
-            var result = PlayersControllerTest.Create();
+            IActionResult result = PlayersControllerTest.Create();
 
             // Assert
-            var viewResult = Assert.IsType<ViewResult>(result);
+            ViewResult viewResult = Assert.IsType<ViewResult>(result);
             Assert.Null(viewResult.ViewData.Model);
         }
 
@@ -60,30 +60,30 @@ namespace Bcf.Tests.ControllersTests.PlayersControllerTests
             PlayersControllerTest.ModelState.AddModelError("error", "testerror");
 
             // Act
-            var result = await PlayersControllerTest.Create(playerVM);
+            IActionResult result = await PlayersControllerTest.Create(playerVM);
 
             // Assert
-            var viewResult = Assert.IsType<ViewResult>(result);
+            ViewResult viewResult = Assert.IsType<ViewResult>(result);
             Assert.IsAssignableFrom<PlayerViewModel>(viewResult.ViewData.Model);
         }
 
         [Fact]
         public async Task Create_Post_ShouldReturn_RedirectToActionIndex_IfModelIsValid()
         {
-            var model = new PlayerViewModel();
+            PlayerViewModel model = new PlayerViewModel();
 
             // Act
-            var result = await PlayersControllerTest.Create(model);
+            IActionResult result = await PlayersControllerTest.Create(model);
 
             // Assert
-            var redirectResult = Assert.IsType<RedirectToActionResult>(result);
+            RedirectToActionResult redirectResult = Assert.IsType<RedirectToActionResult>(result);
             Assert.Equal(nameof(PlayersController.Index), redirectResult.ActionName);
         }
 
         [Fact]
         public async Task Create_Post_ShouldCall_AddItemAsyncOnce_IfModelIsValid()
         {
-            var model = new PlayerViewModel() { FirstName = nameof(Create_Post_ShouldCall_AddItemAsyncOnce_IfModelIsValid) };
+            PlayerViewModel model = new PlayerViewModel() { FirstName = nameof(Create_Post_ShouldCall_AddItemAsyncOnce_IfModelIsValid) };
 
             // Act
             await PlayersControllerTest.Create(model);

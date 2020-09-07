@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Hosting;
 using Moq;
 using System.Collections.Generic;
 
-namespace Bcf.Tests.ControllersTests
+namespace Bcf.Tests.ControllersTests.PlayersControllerTests
 {
     public abstract class BasePlayersControllerTests
     {
@@ -19,7 +19,7 @@ namespace Bcf.Tests.ControllersTests
             Players = players;
             MockRepo = new Mock<IPlayerRepository>();
             MockWebHostEnvironment = new Mock<IWebHostEnvironment>();
-            MockWebHostEnvironment.Setup(m => m.EnvironmentName).Returns("Hosting:UnitTestEnvironment");
+            MockWebHostEnvironment.Setup(m => m.WebRootPath).Returns("WebRootPath:~/images");
             MockRepo.Setup(repo => repo.ListAsync("")).ReturnsAsync(Players);
             PlayersControllerTest = new PlayersController(MockRepo.Object, MockWebHostEnvironment.Object);
         }

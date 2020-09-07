@@ -1,15 +1,13 @@
 ﻿using Bcf.Models;
 using Bcf.ViewModels;
 using Microsoft.AspNetCore.Mvc;
-using Moq;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using Xunit;
 
-namespace Bcf.Tests.ControllersTests
+namespace Bcf.Tests.ControllersTests.PlayersControllerTests
 {
     public class IndexTests : BasePlayersControllerTests
     {
@@ -47,7 +45,7 @@ namespace Bcf.Tests.ControllersTests
         public async Task Index_GetViewModel_ShouldBeOfType_IEnumerablePlayer()
         {
             // Act
-            var result = await PlayersControllerTest.Index();
+            IActionResult result = await PlayersControllerTest.Index();
 
             // Assert
             var viewResult = Assert.IsType<ViewResult>(result);
@@ -58,7 +56,7 @@ namespace Bcf.Tests.ControllersTests
         public async Task Index_Get_ShouldReturn_ListOfPlayers()
         {
             // Act
-            var result = await PlayersControllerTest.Index();
+            IActionResult result = await PlayersControllerTest.Index();
 
             // Assert
             var viewResult = Assert.IsType<ViewResult>(result);
