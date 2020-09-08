@@ -56,7 +56,7 @@ namespace Bcf.Tests.ControllersTests.PlayersControllerTests
         [Fact]
         public async Task Create_Post_ShouldReturn_PlayerViewModel_IfModelIsInvalid()
         {
-            PlayerViewModel playerVM = new PlayerViewModel();
+            CreatePlayerViewModel playerVM = new CreatePlayerViewModel();
             PlayersControllerTest.ModelState.AddModelError("error", "testerror");
 
             // Act
@@ -64,13 +64,13 @@ namespace Bcf.Tests.ControllersTests.PlayersControllerTests
 
             // Assert
             ViewResult viewResult = Assert.IsType<ViewResult>(result);
-            Assert.IsAssignableFrom<PlayerViewModel>(viewResult.ViewData.Model);
+            Assert.IsAssignableFrom<CreatePlayerViewModel>(viewResult.ViewData.Model);
         }
 
         [Fact]
         public async Task Create_Post_ShouldReturn_RedirectToActionIndex_IfModelIsValid()
         {
-            PlayerViewModel model = new PlayerViewModel();
+            CreatePlayerViewModel model = new CreatePlayerViewModel();
 
             // Act
             IActionResult result = await PlayersControllerTest.Create(model);
@@ -83,7 +83,7 @@ namespace Bcf.Tests.ControllersTests.PlayersControllerTests
         [Fact]
         public async Task Create_Post_ShouldCall_AddItemAsyncOnce_IfModelIsValid()
         {
-            PlayerViewModel model = new PlayerViewModel() { FirstName = nameof(Create_Post_ShouldCall_AddItemAsyncOnce_IfModelIsValid) };
+            CreatePlayerViewModel model = new CreatePlayerViewModel() { FirstName = nameof(Create_Post_ShouldCall_AddItemAsyncOnce_IfModelIsValid) };
 
             // Act
             await PlayersControllerTest.Create(model);
@@ -96,7 +96,7 @@ namespace Bcf.Tests.ControllersTests.PlayersControllerTests
         public async Task Create_Post_ShouldCall_AddItemAsyncWithCorrectParameter_IfModelIsValid()
         {
             Player player = new Player() { FirstName = nameof(Create_Post_ShouldCall_AddItemAsyncWithCorrectParameter_IfModelIsValid) };
-            PlayerViewModel model = new PlayerViewModel() { FirstName = player.FirstName };
+            CreatePlayerViewModel model = new CreatePlayerViewModel() { FirstName = player.FirstName };
 
             // Act
             await PlayersControllerTest.Create(model);

@@ -1,4 +1,4 @@
-﻿@model Bcf.ViewModels.PlayerViewModel
+﻿@model Bcf.ViewModels.EditPlayerViewModel
 
 @{
     ViewData["Title"] = "Editer";
@@ -65,16 +65,6 @@
                 <input asp-for="ProfileImage" class="form-control" />
                 <span asp-validation-for="ProfileImage" class="text-danger"></span>
             </div>
-            @*<div class="form-group">
-                <label asp-for="ProfileImage" class="control-label"></label>
-                <img src="@Url.Content("~/images/" + @Model.ProfilePicture)" class="player-info-img" />
-                <div class="custom-file">
-                    <input asp-for="ProfileImage" class="custom-file-input" id="customFile" accept="image/*" type="file">
-                    <label class="custom-file-label" for="customFile">Modifier la photo</label>
-                </div>
-                <span asp-validation-for="ProfileImage" class="text-danger"></span>
-            </div>*@
-
             <div class="form-group">
                 <input type="submit" value="Save" class="btn btn-primary" />
             </div>

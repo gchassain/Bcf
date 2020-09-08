@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System;
 using Microsoft.AspNetCore.Hosting;
 using System.IO;
+using Microsoft.AspNetCore.Http;
 
 namespace Bcf.Controllers
 {
@@ -91,14 +92,14 @@ namespace Bcf.Controllers
         // more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(PlayerViewModel playerVM)
+        public async Task<IActionResult> Create(CreatePlayerViewModel playerVM)
         {
             if (ModelState.IsValid)
             {                
-                UploadProfilImage(playerVM);
+                //UploadProfilImage(playerVM);
                 Player player = new Player()
                 {
-                    Id = playerVM.Id,
+                    //Id = playerVM.Id,
                     FirstName = playerVM.FirstName,
                     LastName = playerVM.LastName,
                     Height = playerVM.Height,
@@ -107,7 +108,7 @@ namespace Bcf.Controllers
                     BirthDate = playerVM.BirthDate,
                     NickName = playerVM.NickName,
                     Number = playerVM.Number,
-                    ProfilePicture = playerVM.ProfilePicture
+                    ProfilePicture = UploadOrReplaceProfilImage(playerVM.ProfileImage)
                 };
                 await _playerRepository.AddAsync(player);
                 return RedirectToAction(actionName: nameof(Index));
@@ -129,7 +130,7 @@ namespace Bcf.Controllers
             {
                 return NotFound();
             }
-            PlayerViewModel playerViewModel = new PlayerViewModel
+            EditPlayerViewModel playerViewModel = new EditPlayerViewModel
             {
                 Id = player.Id,
                 BirthDate = player.BirthDate,
@@ -150,7 +151,7 @@ namespace Bcf.Controllers
         // more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, PlayerViewModel playerVM)
+        public async Task<IActionResult> Edit(int id, EditPlayerViewModel playerVM)
         {
             if (id != playerVM.Id)
             {
@@ -161,7 +162,6 @@ namespace Bcf.Controllers
             {
                 try
                 {
-                    UploadProfilImage(playerVM);
                     Player player = new Player()
                     {
                         Id = playerVM.Id,
@@ -173,9 +173,13 @@ namespace Bcf.Controllers
                         BirthDate = playerVM.BirthDate,
                         NickName = playerVM.NickName,
                         Number = playerVM.Number,
-                        ProfilePicture = playerVM.ProfilePicture
+                        ProfilePicture = UploadOrReplaceProfilImage(playerVM.ProfileImage) ?? playerVM.ProfilePicture
                     };
                     await _playerRepository.UpdateAsync(player);
+                    if (playerVM.ProfileImage != null)
+                    {
+                        DeleteProfilImage(playerVM.ProfilePicture);
+                    }
                 }
                 catch (DbUpdateConcurrencyException)
                 {
@@ -228,7 +232,7 @@ namespace Bcf.Controllers
                 return NotFound();
             }
             await _playerRepository.DeleteAsync(player);
-            DeleteProfilImage(player);
+            DeleteProfilImage(player.ProfilePicture);
             return RedirectToAction(nameof(Index));
         }
 
@@ -236,9 +240,9 @@ namespace Bcf.Controllers
         /// Upload dans le répertoir image une image avec un nom unique
         /// </summary>
         /// <param name="playerVM">Le player model</param>
-        private void UploadProfilImage(PlayerViewModel playerVM)
+        private string UploadOrReplaceProfilImage(IFormFile ProfileImage)
         {
-            string uniqueFileName = GetUniqueFileName(playerVM);
+            string uniqueFileName = ProfileImage == null ? null : $"{ Guid.NewGuid()}_{ ProfileImage.FileName }";
 
             if (uniqueFileName != null)
             {
@@ -247,10 +251,10 @@ namespace Bcf.Controllers
 
                 using (var fileStream = new FileStream(filePath, FileMode.Create))
                 {
-                    playerVM.ProfileImage.CopyTo(fileStream);
+                    ProfileImage.CopyTo(fileStream);
                 }
-                playerVM.ProfilePicture = uniqueFileName;
             }
+            return uniqueFileName;
         }
 
         /// <summary>
@@ -258,7 +262,7 @@ namespace Bcf.Controllers
         /// </summary>
         /// <param name="model">Le modèle contenant l'object FormFile</param>
         /// <returns>Un nom de fichier unique</returns>
-        private string GetUniqueFileName(PlayerViewModel model)
+        private string GetUniqueFileName(CreatePlayerViewModel model)
         {
             if (model.ProfileImage == null)
             {
@@ -271,11 +275,11 @@ namespace Bcf.Controllers
         /// 
         /// </summary>
         /// <param name="player"></param>
-        private void DeleteProfilImage(Player player)
+        private void DeleteProfilImage(string profilePicture)
         {
             try
             {
-                string path = Path.Combine(_webHostEnvironment?.WebRootPath, "images", player.ProfilePicture ?? string.Empty);
+                string path = Path.Combine(_webHostEnvironment?.WebRootPath, "images", profilePicture ?? string.Empty);
 
                 // Check if file exists with its full path    
                 if (!System.IO.File.Exists(path))

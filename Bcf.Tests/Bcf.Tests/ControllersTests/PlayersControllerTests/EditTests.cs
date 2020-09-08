@@ -81,7 +81,7 @@ namespace Bcf.Tests.ControllersTests.PlayersControllerTests
 
             // Assert
             ViewResult viewResult = Assert.IsType<ViewResult>(result);
-            Assert.IsAssignableFrom<PlayerViewModel>(viewResult.ViewData.Model);
+            Assert.IsAssignableFrom<EditPlayerViewModel>(viewResult.ViewData.Model);
         }
 
         [Fact]
@@ -94,8 +94,7 @@ namespace Bcf.Tests.ControllersTests.PlayersControllerTests
 
             // Assert
             ViewResult viewResult = Assert.IsType<ViewResult>(result);
-            PlayerViewModel viewModel = Assert.IsAssignableFrom<PlayerViewModel>(viewResult.ViewData.Model);
-            Assert.Equal(PlayerOne.Id, viewModel.Id);
+            EditPlayerViewModel viewModel = Assert.IsAssignableFrom<EditPlayerViewModel>(viewResult.ViewData.Model);
             Assert.Equal(PlayerOne.FirstName, viewModel.FirstName);
             Assert.Equal(PlayerOne.LastName, viewModel.LastName);
             Assert.Equal(PlayerOne.Number, viewModel.Number);
@@ -110,7 +109,7 @@ namespace Bcf.Tests.ControllersTests.PlayersControllerTests
         [Fact]
         public async Task Edit_Post_ShouldReturn_PlayerViewModel_IfModelIsInvalid()
         {
-            PlayerViewModel model = new PlayerViewModel() { Id = PlayerOne.Id };
+            EditPlayerViewModel model = new EditPlayerViewModel() { Id = PlayerOne.Id };
 
             PlayersControllerTest.ModelState.AddModelError("error", "testerror");
 
@@ -119,13 +118,13 @@ namespace Bcf.Tests.ControllersTests.PlayersControllerTests
 
             // Assert
             ViewResult viewResult = Assert.IsType<ViewResult>(result);
-            Assert.IsAssignableFrom<PlayerViewModel>(viewResult.ViewData.Model);
+            Assert.IsAssignableFrom<EditPlayerViewModel>(viewResult.ViewData.Model);
         }
 
         [Fact]
         public async Task Edit_Post_ShouldReturn_RedirectToActionIndex_IfModelIsValid()
         {
-            PlayerViewModel model = new PlayerViewModel() { Id = PlayerOne.Id };
+            EditPlayerViewModel model = new EditPlayerViewModel() { Id = PlayerOne.Id };
 
             // Act
             IActionResult result = await PlayersControllerTest.Edit(PlayerOne.Id, model);
@@ -138,7 +137,7 @@ namespace Bcf.Tests.ControllersTests.PlayersControllerTests
         [Fact]
         public async Task Edit_Post_ShouldCall_UpdateAsync_Once_IfModelIsValid()
         {
-            PlayerViewModel model = new PlayerViewModel() { Id = PlayerOne.Id };
+            EditPlayerViewModel model = new EditPlayerViewModel() { Id = PlayerOne.Id };
 
             // Act
             IActionResult result = await PlayersControllerTest.Edit(PlayerOne.Id, model);
@@ -150,7 +149,7 @@ namespace Bcf.Tests.ControllersTests.PlayersControllerTests
         public async Task Edit_Post_ShouldCall_UpdateAsync_WithCorrectParameter_IfModelIsValid()
         {
             Player player = new Player() { Id = PlayerOne.Id, FirstName = nameof(Edit_Post_ShouldCall_UpdateAsync_WithCorrectParameter_IfModelIsValid) };
-            PlayerViewModel model = new PlayerViewModel() { Id = player.Id, FirstName = player.FirstName };
+            EditPlayerViewModel model = new EditPlayerViewModel() { Id = player.Id, FirstName = player.FirstName };
 
             await PlayersControllerTest.Edit(player.Id, model);
 

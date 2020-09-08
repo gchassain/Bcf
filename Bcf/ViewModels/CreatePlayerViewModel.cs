@@ -1,14 +1,13 @@
 ﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
 using System;
 using System.ComponentModel.DataAnnotations;
 using static Bcf.Models.Enums;
 
 namespace Bcf.ViewModels
 {
-    public class PlayerViewModel
+    public class CreatePlayerViewModel
     {
-        public int Id { get; set; }
+        //public int Id { get; set; }
 
         [RegularExpression(@"^[A-Z]+[a-zA-Zéèêëïîâäàùûôöüç-]*$", ErrorMessage = "Saississez un prénom valide")]
         [Required(AllowEmptyStrings = false, ErrorMessage = "Veuillez saisir un prénom"), Display(Name = "Prénom"), StringLength(30)]
@@ -43,8 +42,5 @@ namespace Bcf.ViewModels
 
         [Display(Name = "Photo de profil")]
         public IFormFile ProfileImage { get; set; }
-
-        [Display(Name = "Joueur")]
-        public string FullName => $"{FirstName} {LastName}";
     }
 }
