@@ -69,7 +69,6 @@ namespace Bcf
             if (!players.Any())
             {
                 await repo.SaveChangeAsync(GetPlayersTest());
-               // await repo.AddAsync(GetPlayersTest());
             }
         }
 

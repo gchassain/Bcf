@@ -21,12 +21,12 @@ namespace Bcf.Controllers
         {
             _playerRepository = playerRepository;
             _webHostEnvironment = webHostEnvironment;
-    }
+        }
 
         // GET: Players
         public async Task<IActionResult> Index(string searchString = "")
         {
-            List<Player> players = await _playerRepository.ListAsync(searchString);
+            List<Player> players = await _playerRepository.ListAsync(searchString ?? string.Empty);
             List<IndexPlayerViewModel> playersVM = new List<IndexPlayerViewModel>();
 
             foreach (Player player in players)
@@ -34,13 +34,14 @@ namespace Bcf.Controllers
                 playersVM.Add(new IndexPlayerViewModel()
                 {
                     Id = player.Id,
-                    FullName = player.FullName,
+                    FirstName = player.FirstName,
+                    LastName = player.LastName,
                     Height = player.Height / 100,
                     Weight = player.Weight,
                     Number = player.Number,
                     Position = player.Position,
                     ProfilePicture = player.ProfilePicture
-                });
+                }); ;
             }
             return View(playersVM);
         }
@@ -95,7 +96,7 @@ namespace Bcf.Controllers
         public async Task<IActionResult> Create(CreatePlayerViewModel playerVM)
         {
             if (ModelState.IsValid)
-            {                
+            {
                 //UploadProfilImage(playerVM);
                 Player player = new Player()
                 {

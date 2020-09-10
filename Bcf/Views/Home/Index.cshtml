@@ -1,8 +1,24 @@
 ﻿@{
-    ViewData["Title"] = "Home Page";
+    ViewData["Title"] = "Accueil";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://docs.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+
+<div class="bcf-fb-news">
+    <h4 class="bcf-title">
+        News
+    </h4>
+    <div id="fb-root"></div>
+    <div class="fb-page bcf-fb-div" data-href="https://www.facebook.com/bcfretin" data-tabs="timeline, events, messages"
+            data-width="300" data-height="800" data-small-header="false" data-adapt-container-width="true"
+            data-hide-cover="false" data-show-facepile="true">
+        <blockquote cite="https://www.facebook.com/bcfretin" class="fb-xfbml-parse-ignore">
+            <a href="https://www.facebook.com/bcfretin">BC Fretin</a>
+        </blockquote>
+    </div>
 </div>
+
+@section Scripts {
+    <script async defer crossorigin="anonymous" src="https://connect.facebook.net/fr_FR/sdk.js#xfbml=1&version=v8.0" nonce="rJozGIrE">
+    </script>
+}
+
