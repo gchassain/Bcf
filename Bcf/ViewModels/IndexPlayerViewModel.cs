@@ -7,8 +7,8 @@ namespace Bcf.ViewModels
     {
         public int Id { get; set; }
         [Display(Name = "Joueur")]
-        public string FullName { get; set; }
-        [Display(Name = "Numéro")]
+        public string LastName { get; set; }
+        public string FirstName { get; set; }
         public int Number { get; set; }
         [Display(Name = "Poste")]
         public PlayerPositionsEnum Position { get; set; }
