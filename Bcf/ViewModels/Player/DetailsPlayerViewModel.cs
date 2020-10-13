@@ -7,7 +7,9 @@ namespace Bcf.ViewModels
     public class DetailsPlayerViewModel
     {
         public int Id { get; set; }
+
         public string FullName { get; set; }
+
         public int Number { get; set; }
 
         [DataType(DataType.Date), DisplayFormat(DataFormatString = "Né le : {0:dd-MM-yyyy}")]
@@ -20,6 +22,10 @@ namespace Bcf.ViewModels
         public double Height { get; set; }
 
         public PlayerPositionsEnum Position { get; set; }
+
         public string ProfilePicture { get; set; }
+
+        [Display(Name = "Equipe")]
+        public string NameOfTeam { get; set; }
     }
 }

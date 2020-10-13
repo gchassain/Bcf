@@ -23,7 +23,8 @@ namespace Bcf.Tests.ControllersTests.PlayerControllerTests
             BirthDate = new DateTime(1984, 12, 30),
             Number = 23,
             Position = Enums.PlayerPositionsEnum.POWER_FORWARD,
-            ProfilePicture = "lebron-james.png"
+            ProfilePicture = "lebron-james.png",
+            Team = new Team() { NameOfTeam = "Equipe 1" }
         };
         private static readonly Player PlayerTwo = new Player
         {
@@ -36,7 +37,8 @@ namespace Bcf.Tests.ControllersTests.PlayerControllerTests
             BirthDate = new DateTime(1963, 02, 17),
             Number = 23,
             Position = Enums.PlayerPositionsEnum.SMALL_FORWARD,
-            ProfilePicture = "michael-jordan.png"
+            ProfilePicture = "michael-jordan.png",
+            Team = new Team() { NameOfTeam = "Equipe 2" }
         };
 
         public CreateTests() : base (new List<Player>() { PlayerOne, PlayerTwo })
