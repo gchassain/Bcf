@@ -11,11 +11,11 @@
 [Rr]eleases/
 x64/
 x86/
-bld/
+ld/
 [Bb]in/
 [Oo]bj/
 [Mm]igrations/
-wwwroot/images/
+[Ww]wwroot/images/
 
 
 # Visual Studio 2015 cache/options directory
