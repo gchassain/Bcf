@@ -7,9 +7,9 @@ using System.Linq;
 using System.Threading.Tasks;
 using Xunit;
 
-namespace Bcf.Tests.ControllersTests.PlayersControllerTests
+namespace Bcf.Tests.ControllersTests.PlayerControllerTests
 {
-    public class IndexTests : BasePlayersControllerTests
+    public class IndexTests : BasePlayerControllerTests
     {
         private static readonly Player PlayerOne = new Player()
         {
@@ -22,7 +22,8 @@ namespace Bcf.Tests.ControllersTests.PlayersControllerTests
             BirthDate = new DateTime(1984, 12, 30),
             Number = 23,
             Position = Enums.PlayerPositionsEnum.POWER_FORWARD,
-            ProfilePicture = "lebron-james.png"
+            ProfilePicture = "lebron-james.png",
+            Team = new Team() { NameOfTeam = "Equipe 1" }
         };
         private static readonly Player PlayerTwo = new Player
         {
@@ -35,7 +36,8 @@ namespace Bcf.Tests.ControllersTests.PlayersControllerTests
             BirthDate = new DateTime(1963, 02, 17),
             Number = 23,
             Position = Enums.PlayerPositionsEnum.SMALL_FORWARD,
-            ProfilePicture = "michael-jordan.png"
+            ProfilePicture = "michael-jordan.png",
+            Team = new Team() { NameOfTeam = "Equipe 2" }
         };
 
         public IndexTests() : base(new List<Player>() {  PlayerOne, PlayerTwo })
@@ -45,22 +47,22 @@ namespace Bcf.Tests.ControllersTests.PlayersControllerTests
         public async Task Index_GetViewModel_ShouldBeOfType_IEnumerablePlayer()
         {
             // Act
-            IActionResult result = await PlayersControllerTest.Index();
+            IActionResult result = await PlayerControllerTests.Index();
 
             // Assert
             var viewResult = Assert.IsType<ViewResult>(result);
-            Assert.IsAssignableFrom<IEnumerable<IndexPlayerViewModel>>(viewResult.ViewData.Model);
+            Assert.IsAssignableFrom<IEnumerable<PlayerViewModel>>(viewResult.ViewData.Model);
         }
 
         [Fact]
         public async Task Index_Get_ShouldReturn_ListOfPlayers()
         {
             // Act
-            IActionResult result = await PlayersControllerTest.Index();
+            IActionResult result = await PlayerControllerTests.Index();
 
             // Assert
             var viewResult = Assert.IsType<ViewResult>(result);
-            var model = Assert.IsAssignableFrom<IEnumerable<IndexPlayerViewModel>>(viewResult.ViewData.Model);
+            var model = Assert.IsAssignableFrom<IEnumerable<PlayerViewModel>>(viewResult.ViewData.Model);
             Assert.Equal(2, model.Count());
         }
     }

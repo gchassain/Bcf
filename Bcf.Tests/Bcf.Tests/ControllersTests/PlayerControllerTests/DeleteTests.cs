@@ -7,9 +7,9 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Xunit;
 
-namespace Bcf.Tests.ControllersTests.PlayersControllerTests
+namespace Bcf.Tests.ControllersTests.PlayerControllerTests
 {
-    public class DeleteTests : BasePlayersControllerTests
+    public class DeleteTests : BasePlayerControllerTests
     {
         private static readonly Player PlayerOne = new Player()
         {
@@ -27,7 +27,7 @@ namespace Bcf.Tests.ControllersTests.PlayersControllerTests
         public async Task Delete_Get_WithIdNull_ShouldReturn_NotFound()
         {
             // Act
-            IActionResult result = await PlayersControllerTest.Delete(null);
+            IActionResult result = await PlayerControllerTests.Delete(null);
 
             // Assert
             Assert.IsType<NotFoundResult>(result);
@@ -37,7 +37,7 @@ namespace Bcf.Tests.ControllersTests.PlayersControllerTests
         public async Task Delete_Get_WithInvalidId_ShouldReturn_NotFound()
         {
             // Act
-            IActionResult result = await PlayersControllerTest.Delete(19);
+            IActionResult result = await PlayerControllerTests.Delete(19);
 
             // Assert
             Assert.IsType<NotFoundResult>(result);
@@ -47,7 +47,7 @@ namespace Bcf.Tests.ControllersTests.PlayersControllerTests
         public async Task Delete_Get_ShouldCall_GetAync_Once()
         {
             // Act
-            IActionResult result = await PlayersControllerTest.Delete(1);
+            IActionResult result = await PlayerControllerTests.Delete(1);
 
             // Assert
             MockRepo.Verify(mock => mock.GetByIdAsync(It.IsAny<int>()), Times.Once);
@@ -59,7 +59,7 @@ namespace Bcf.Tests.ControllersTests.PlayersControllerTests
             MockRepo.Setup(repo => repo.GetByIdAsync(PlayerOne.Id)).ReturnsAsync(PlayerOne);
 
             // Act
-            IActionResult result = await PlayersControllerTest.Delete(1);
+            IActionResult result = await PlayerControllerTests.Delete(1);
 
             // Assert
             ViewResult viewResult = Assert.IsType<ViewResult>(result);
@@ -72,7 +72,7 @@ namespace Bcf.Tests.ControllersTests.PlayersControllerTests
             MockRepo.Setup(repo => repo.GetByIdAsync(PlayerOne.Id)).ReturnsAsync(PlayerOne);
 
             // Act
-            IActionResult result = await PlayersControllerTest.Delete(1);
+            IActionResult result = await PlayerControllerTests.Delete(1);
 
             // Assert
             ViewResult viewResult = Assert.IsType<ViewResult>(result);
@@ -87,7 +87,7 @@ namespace Bcf.Tests.ControllersTests.PlayersControllerTests
             DeletePlayerViewModel deletePlayerVM = new DeletePlayerViewModel();
 
             // Act
-            IActionResult result = await PlayersControllerTest.DeleteConfirmed(deletePlayerVM.Id);
+            IActionResult result = await PlayerControllerTests.DeleteConfirmed(deletePlayerVM.Id);
 
             // Assert
             Assert.IsType<NotFoundResult>(result);
@@ -99,11 +99,11 @@ namespace Bcf.Tests.ControllersTests.PlayersControllerTests
             MockRepo.Setup(repo => repo.GetByIdAsync(PlayerOne.Id)).ReturnsAsync(PlayerOne);
             DeletePlayerViewModel deletePlayerVM = new DeletePlayerViewModel() { Id = PlayerOne.Id };
             // Act
-            IActionResult result = await PlayersControllerTest.DeleteConfirmed(deletePlayerVM.Id);
+            IActionResult result = await PlayerControllerTests.DeleteConfirmed(deletePlayerVM.Id);
 
             // Assert
             RedirectToActionResult redirectResult = Assert.IsType<RedirectToActionResult>(result);
-            Assert.Equal(nameof(PlayersControllerTest.Index), redirectResult.ActionName);
+            Assert.Equal(nameof(PlayerControllerTests.Index), redirectResult.ActionName);
         }
 
         [Fact]
@@ -113,7 +113,7 @@ namespace Bcf.Tests.ControllersTests.PlayersControllerTests
             DeletePlayerViewModel deletePlayerVM = new DeletePlayerViewModel() { Id = PlayerOne.Id };
 
             // Act
-            IActionResult result = await PlayersControllerTest.DeleteConfirmed(deletePlayerVM.Id);
+            IActionResult result = await PlayerControllerTests.DeleteConfirmed(deletePlayerVM.Id);
 
             // Assert
             MockRepo.Verify(mock => mock.DeleteAsync(It.IsAny<Player>()), Times.Once);
@@ -126,7 +126,7 @@ namespace Bcf.Tests.ControllersTests.PlayersControllerTests
             DeletePlayerViewModel deletePlayerVM = new DeletePlayerViewModel() { Id = PlayerOne.Id, FullName = PlayerOne.FullName };
 
             // Act
-            await PlayersControllerTest.DeleteConfirmed(deletePlayerVM.Id);
+            await PlayerControllerTests.DeleteConfirmed(deletePlayerVM.Id);
             // Assert
             MockRepo.Verify(repo => repo.DeleteAsync(It.Is<Player>(p => p.Id.Equals(PlayerOne.Id))), Times.Once);
         }

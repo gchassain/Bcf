@@ -9,44 +9,63 @@ using System;
 using Microsoft.AspNetCore.Hosting;
 using System.IO;
 using Microsoft.AspNetCore.Http;
+using System.Linq;
+using Microsoft.AspNetCore.Mvc.Rendering;
+using System.Data;
 
 namespace Bcf.Controllers
 {
-    public class PlayersController : Controller
+    public class PlayerController : Controller
     {
-        private readonly IPlayerRepository _playerRepository;
+        private readonly IBcfRepository _repository;
         private readonly IWebHostEnvironment _webHostEnvironment;
 
-        public PlayersController(IPlayerRepository playerRepository, IWebHostEnvironment webHostEnvironment)
+        public PlayerController(IBcfRepository playerRepository, IWebHostEnvironment webHostEnvironment)
         {
-            _playerRepository = playerRepository;
+            _repository = playerRepository;
             _webHostEnvironment = webHostEnvironment;
         }
 
-        // GET: Players
-        public async Task<IActionResult> Index(string searchString = "")
+        // GET: Player
+        public async Task<IActionResult> Index(string playerTeam, string searchString)
         {
-            List<Player> players = await _playerRepository.ListAsync(searchString ?? string.Empty);
-            List<IndexPlayerViewModel> playersVM = new List<IndexPlayerViewModel>();
+            IQueryable<string> teamsQuery = _repository.ListTeamsByPlayer().Select(t => t.NameOfTeam);
+            List<Player> players = _repository.ListPlayers().ToList();            
 
-            foreach (Player player in players)
+            if (!string.IsNullOrEmpty(searchString))
             {
-                playersVM.Add(new IndexPlayerViewModel()
-                {
-                    Id = player.Id,
-                    FirstName = player.FirstName,
-                    LastName = player.LastName,
-                    Height = player.Height / 100,
-                    Weight = player.Weight,
-                    Number = player.Number,
-                    Position = player.Position,
-                    ProfilePicture = player.ProfilePicture
-                }); ;
+                players = players.Where(p => p.LastName.Contains(searchString) ||
+                                             p.FirstName.Contains(searchString))
+                    .ToList();
             }
-            return View(playersVM);
+            if (!string.IsNullOrEmpty(playerTeam))
+            {
+                players = players.Where(p => p.Team.NameOfTeam == playerTeam)
+                    .ToList();
+            }
+
+            List<PlayerViewModel> playersVM = players.Select(player => new PlayerViewModel()
+            {
+                Id = player.Id,
+                FirstName = player.FirstName,
+                LastName = player.LastName,
+                Height = player.Height / 100,
+                Weight = player.Weight,
+                Number = player.Number,
+                Position = player.Position,
+                ProfilePicture = player.ProfilePicture,
+                NameOfTeam = player?.Team?.NameOfTeam
+            }).ToList();
+
+            IndexViewModel indexVM = new IndexViewModel()
+            {
+                PlayersVM = playersVM,
+                Teams = new SelectList(await teamsQuery.Distinct().ToListAsync())
+            };
+            return View(indexVM);
         }
 
-        // GET: Players/Details/5
+        // GET: Player/Details/5
         public async Task<IActionResult> Details(int? id)
         {
             if (!id.HasValue)
@@ -56,7 +75,7 @@ namespace Bcf.Controllers
 
             try
             {
-                Player player = await _playerRepository.GetByIdAsync(id.Value);
+                Player player = await _repository.GetByIdAsync(id.Value);
 
                 if (player == null)
                 {
@@ -72,7 +91,8 @@ namespace Bcf.Controllers
                     Number = player.Number,
                     Position = player.Position,
                     ProfilePicture = player.ProfilePicture,
-                    BirthDate = player.BirthDate
+                    BirthDate = player.BirthDate,
+                    NameOfTeam = player?.Team?.NameOfTeam
                 };
                 return View(detailsPlayerVM);
             }
@@ -82,50 +102,68 @@ namespace Bcf.Controllers
             }
         }
 
-        // GET: Players/Create
-        public IActionResult Create()
+         // GET: Player/Create
+        public async Task<IActionResult> Create()
         {
-            return View();
+            List<Team> teams = await _repository.ListTeamsAsync();
+            CreatePlayerViewModel viewModel = new CreatePlayerViewModel
+            {
+                Teams = teams.Select(t =>
+                                        new SelectListItem()
+                                        {
+                                            Value = t.Id.ToString(),
+                                            Text = t.NameOfTeam
+                                        }).ToList()
+            };
+            return View(viewModel);
         }
 
-        // POST: Players/Create
+        // POST: Player/Create
         // To protect from overposting attacks, enable the specific properties you want to bind to, for 
         // more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(CreatePlayerViewModel playerVM)
+        public async Task<IActionResult> Create([Bind("FirstName, LastName, Position, Number, Height, Weight, NickName, BirthDate, ProfilPicture, ProfileImage, TeamId")]CreatePlayerViewModel playerVM)
         {
-            if (ModelState.IsValid)
+            try
             {
-                //UploadProfilImage(playerVM);
-                Player player = new Player()
+                if (ModelState.IsValid)
                 {
-                    //Id = playerVM.Id,
-                    FirstName = playerVM.FirstName,
-                    LastName = playerVM.LastName,
-                    Height = playerVM.Height,
-                    Weight = playerVM.Weight,
-                    Position = playerVM.Position,
-                    BirthDate = playerVM.BirthDate,
-                    NickName = playerVM.NickName,
-                    Number = playerVM.Number,
-                    ProfilePicture = UploadOrReplaceProfilImage(playerVM.ProfileImage)
-                };
-                await _playerRepository.AddAsync(player);
-                return RedirectToAction(actionName: nameof(Index));
+                    Player player = new Player()
+                    {
+                        FirstName = playerVM.FirstName,
+                        LastName = playerVM.LastName,
+                        Height = playerVM.Height,
+                        Weight = playerVM.Weight,
+                        Position = playerVM.Position,
+                        BirthDate = playerVM.BirthDate,
+                        NickName = playerVM.NickName,
+                        Number = playerVM.Number,
+                        ProfilePicture = UploadOrReplaceProfilImage(playerVM.ProfileImage),
+                        TeamId = playerVM.TeamId
+                    };
+                    await _repository.AddAsync(player);
+                    return RedirectToAction(actionName: nameof(Index));
+                }
+            }
+            catch (DataException /*dEx*/)
+            {
+                //Log the error (uncomment dEx variable name and add a line here to write a log.
+                ModelState.AddModelError("", "Impossible d'enregistrer les modifications. Réessayez, et si le problème persiste, consultez votre administrateur système.");
             }
             return View(playerVM);
         }
 
-        // GET: Players/Edit/5
+        // GET: Player/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
             if (!id.HasValue)
             {
-                return NotFound();
+                return BadRequest();
             }
 
-            Player player = await _playerRepository.GetByIdAsync(id.Value);
+            Player player = await _repository.GetByIdAsync(id.Value);
+            List<Team> teams = await _repository.ListTeamsAsync();
 
             if (player == null)
             {
@@ -142,23 +180,33 @@ namespace Bcf.Controllers
                 NickName = player.NickName,
                 Number = player.Number,
                 Position = player.Position,
-                ProfilePicture = player.ProfilePicture
+                ProfilePicture = player.ProfilePicture,
+                TeamId = player.TeamId,
+                Teams = teams.Select(t =>
+                        new SelectListItem()
+                        {
+                            Value = t.Id.ToString(),
+                            Text = t.NameOfTeam
+                        }).ToList()
             };
             return View(playerViewModel);
         }
 
-        // POST: Players/Edit/5
+        // POST: Player/Edit/5
         // To protect from overposting attacks, enable the specific properties you want to bind to, for 
         // more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, EditPlayerViewModel playerVM)
+        public async Task<IActionResult> Edit(int? id, [FromForm] EditPlayerViewModel playerVM)
         {
+            if (!id.HasValue)
+            {
+                return BadRequest();
+            }
             if (id != playerVM.Id)
             {
                 return NotFound();
             }
-
             if (ModelState.IsValid)
             {
                 try
@@ -168,6 +216,7 @@ namespace Bcf.Controllers
                         Id = playerVM.Id,
                         FirstName = playerVM.FirstName,
                         LastName = playerVM.LastName,
+                        TeamId = playerVM.TeamId,
                         Height = playerVM.Height,
                         Weight = playerVM.Weight,
                         Position = playerVM.Position,
@@ -176,7 +225,7 @@ namespace Bcf.Controllers
                         Number = playerVM.Number,
                         ProfilePicture = UploadOrReplaceProfilImage(playerVM.ProfileImage) ?? playerVM.ProfilePicture
                     };
-                    await _playerRepository.UpdateAsync(player);
+                    await _repository.UpdateAsync(player);
                     if (playerVM.ProfileImage != null)
                     {
                         DeleteProfilImage(playerVM.ProfilePicture);
@@ -184,7 +233,7 @@ namespace Bcf.Controllers
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!_playerRepository.Exist(playerVM.Id))
+                    if (!_repository.Exist(playerVM.Id))
                     {
                         return NotFound();
                     }
@@ -198,7 +247,7 @@ namespace Bcf.Controllers
             return View(playerVM);
         }
 
-        // GET: Players/Delete/5
+        // GET: Player/Delete/5
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -206,7 +255,7 @@ namespace Bcf.Controllers
                 return NotFound();
             }
 
-            Player player = await _playerRepository.GetByIdAsync(id.Value);
+            Player player = await _repository.GetByIdAsync(id.Value);
 
             if (player == null)
             {
@@ -221,18 +270,18 @@ namespace Bcf.Controllers
             return View(deletePlayerViewModel);
         }
 
-        // POST: Players/Delete/5
+        // POST: Player/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            Player player = await _playerRepository.GetByIdAsync(id);
+            Player player = await _repository.GetByIdAsync(id);
 
             if (player == null)
             {
                 return NotFound();
             }
-            await _playerRepository.DeleteAsync(player);
+            await _repository.DeleteAsync(player);
             DeleteProfilImage(player.ProfilePicture);
             return RedirectToAction(nameof(Index));
         }

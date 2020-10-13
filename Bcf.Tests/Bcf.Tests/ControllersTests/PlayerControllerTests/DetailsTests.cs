@@ -8,29 +8,37 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Xunit;
 
-namespace Bcf.Tests.ControllersTests.PlayersControllerTests
+namespace Bcf.Tests.ControllersTests.PlayerControllerTests
 {
-    public class DetailsTests : BasePlayersControllerTests
+    public class DetailsTests : BasePlayerControllerTests
     {
         private static readonly Player PlayerOne = new Player()
         {
             Id = 1,
+            FirstName = "LeBron",
+            LastName = "James",
+            NickName = "The king",
             Height = 206,
             Weight = 113,
             BirthDate = new DateTime(1984, 12, 30),
             Number = 23,
             Position = Enums.PlayerPositionsEnum.POWER_FORWARD,
-            ProfilePicture = "lebron-james.png"
+            ProfilePicture = "lebron-james.png",
+            Team = new Team() { NameOfTeam = "Equipe 1" }
         };
         private static readonly Player PlayerTwo = new Player
         {
             Id = 2,
+            FirstName = "Michael",
+            LastName = "Jordan",
+            NickName = "His Airness",
             Height = 198,
             Weight = 98,
             BirthDate = new DateTime(1963, 02, 17),
             Number = 23,
             Position = Enums.PlayerPositionsEnum.SMALL_FORWARD,
-            ProfilePicture = "michael-jordan.png"
+            ProfilePicture = "michael-jordan.png",
+            Team = new Team() { NameOfTeam = "Equipe 2" }
         };
 
         public DetailsTests() : base(new List<Player>() { PlayerOne, PlayerTwo })
@@ -40,7 +48,7 @@ namespace Bcf.Tests.ControllersTests.PlayersControllerTests
         public async Task Details_Get_WithIdNull_ShouldReturn_NotFound()
         {
             // Act
-            IActionResult result = await PlayersControllerTest.Details(null);
+            IActionResult result = await PlayerControllerTests.Details(null);
 
             // Assert
             Assert.IsType<NotFoundResult>(result);
@@ -50,7 +58,7 @@ namespace Bcf.Tests.ControllersTests.PlayersControllerTests
         public async Task Details_Get_WithInvalidId_ShouldReturn_NotFound()
         {
             // Act
-            IActionResult result = await PlayersControllerTest.Details(19);
+            IActionResult result = await PlayerControllerTests.Details(19);
 
             // Assert
             Assert.IsType<NotFoundResult>(result);
@@ -60,7 +68,7 @@ namespace Bcf.Tests.ControllersTests.PlayersControllerTests
         public async Task Details_Get_ShouldCall_GetAsync_Once()
         {
             // Act
-            IActionResult result = await PlayersControllerTest.Details(1);
+            IActionResult result = await PlayerControllerTests.Details(1);
 
             MockRepo.Verify(repo => repo.GetByIdAsync(It.IsAny<int>()), Times.Once);
         }
@@ -71,7 +79,7 @@ namespace Bcf.Tests.ControllersTests.PlayersControllerTests
             MockRepo.Setup(repo => repo.GetByIdAsync(PlayerOne.Id)).ReturnsAsync(PlayerOne);
 
             // Act
-            IActionResult result = await PlayersControllerTest.Details(PlayerOne.Id);
+            IActionResult result = await PlayerControllerTests.Details(PlayerOne.Id);
 
             // Assert
             ViewResult viewResult = Assert.IsType<ViewResult>(result);
@@ -84,7 +92,7 @@ namespace Bcf.Tests.ControllersTests.PlayersControllerTests
             MockRepo.Setup(repo => repo.GetByIdAsync(PlayerOne.Id)).ReturnsAsync(PlayerOne);
 
             // Act
-            IActionResult result = await PlayersControllerTest.Details(PlayerOne.Id);
+            IActionResult result = await PlayerControllerTests.Details(PlayerOne.Id);
 
             // Assert
             ViewResult viewResult = Assert.IsType<ViewResult>(result);

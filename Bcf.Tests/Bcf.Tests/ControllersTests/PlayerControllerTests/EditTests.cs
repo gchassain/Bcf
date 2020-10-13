@@ -8,9 +8,9 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Xunit;
 
-namespace Bcf.Tests.ControllersTests.PlayersControllerTests
+namespace Bcf.Tests.ControllersTests.PlayerControllerTests
 {
-    public class EditTests : BasePlayersControllerTests
+    public class EditTests : BasePlayerControllerTests
     {
         private static readonly Player PlayerOne = new Player()
         {
@@ -23,7 +23,8 @@ namespace Bcf.Tests.ControllersTests.PlayersControllerTests
             BirthDate = new DateTime(1984, 12, 30),
             Number = 23,
             Position = Enums.PlayerPositionsEnum.POWER_FORWARD,
-            ProfilePicture = "lebron-james.png"
+            ProfilePicture = "lebron-james.png",
+            Team = new Team() { NameOfTeam = "Equipe 1" }
         };
         private static readonly Player PlayerTwo = new Player
         {
@@ -36,7 +37,8 @@ namespace Bcf.Tests.ControllersTests.PlayersControllerTests
             BirthDate = new DateTime(1963, 02, 17),
             Number = 23,
             Position = Enums.PlayerPositionsEnum.SMALL_FORWARD,
-            ProfilePicture = "michael-jordan.png"
+            ProfilePicture = "michael-jordan.png",
+            Team = new Team() { NameOfTeam = "Equipe 2" }
         };
 
         public EditTests() : base (new List<Player>() { PlayerOne, PlayerTwo })
@@ -46,7 +48,7 @@ namespace Bcf.Tests.ControllersTests.PlayersControllerTests
         public async Task Edit_Get_WithIdNull_ShouldReturn_NotFound()
         {
             // Act
-            IActionResult result = await PlayersControllerTest.Edit(null);
+            IActionResult result = await PlayerControllerTests.Edit(null);
 
             // Assert
             Assert.IsType<NotFoundResult>(result);
@@ -56,7 +58,7 @@ namespace Bcf.Tests.ControllersTests.PlayersControllerTests
         public async Task Edit_Get_WithInvalidId_ShouldReturn_NotFound()
         {
             // Act
-            IActionResult result = await PlayersControllerTest.Edit(19);
+            IActionResult result = await PlayerControllerTests.Edit(19);
 
             // Assert
             Assert.IsType<NotFoundResult>(result);
@@ -66,7 +68,7 @@ namespace Bcf.Tests.ControllersTests.PlayersControllerTests
         public async Task Edit_Get_ShouldCall_GetAsync_Once()
         {
             // Act
-            IActionResult result = await PlayersControllerTest.Edit(1);
+            IActionResult result = await PlayerControllerTests.Edit(1);
 
             MockRepo.Verify(repo => repo.GetByIdAsync(It.IsAny<int>()), Times.Once);
         }
@@ -77,7 +79,7 @@ namespace Bcf.Tests.ControllersTests.PlayersControllerTests
             MockRepo.Setup(repo => repo.GetByIdAsync(PlayerOne.Id)).ReturnsAsync(PlayerOne);
 
             // Act
-            IActionResult result = await PlayersControllerTest.Edit(PlayerOne.Id);
+            IActionResult result = await PlayerControllerTests.Edit(PlayerOne.Id);
 
             // Assert
             ViewResult viewResult = Assert.IsType<ViewResult>(result);
@@ -90,7 +92,7 @@ namespace Bcf.Tests.ControllersTests.PlayersControllerTests
             MockRepo.Setup(repo => repo.GetByIdAsync(PlayerOne.Id)).ReturnsAsync(PlayerOne);
 
             // Act
-            IActionResult result = await PlayersControllerTest.Edit(PlayerOne.Id);
+            IActionResult result = await PlayerControllerTests.Edit(PlayerOne.Id);
 
             // Assert
             ViewResult viewResult = Assert.IsType<ViewResult>(result);
@@ -111,10 +113,10 @@ namespace Bcf.Tests.ControllersTests.PlayersControllerTests
         {
             EditPlayerViewModel model = new EditPlayerViewModel() { Id = PlayerOne.Id };
 
-            PlayersControllerTest.ModelState.AddModelError("error", "testerror");
+            PlayerControllerTests.ModelState.AddModelError("error", "testerror");
 
             // Act
-            IActionResult result = await PlayersControllerTest.Edit(PlayerOne.Id, model);
+            IActionResult result = await PlayerControllerTests.Edit(PlayerOne.Id, model);
 
             // Assert
             ViewResult viewResult = Assert.IsType<ViewResult>(result);
@@ -127,11 +129,11 @@ namespace Bcf.Tests.ControllersTests.PlayersControllerTests
             EditPlayerViewModel model = new EditPlayerViewModel() { Id = PlayerOne.Id };
 
             // Act
-            IActionResult result = await PlayersControllerTest.Edit(PlayerOne.Id, model);
+            IActionResult result = await PlayerControllerTests.Edit(PlayerOne.Id, model);
 
             // Assert
             RedirectToActionResult redirectResult = Assert.IsType<RedirectToActionResult>(result);
-            Assert.Equal(nameof(PlayersController.Index), redirectResult.ActionName);
+            Assert.Equal(nameof(PlayerController.Index), redirectResult.ActionName);
         }
 
         [Fact]
@@ -140,7 +142,7 @@ namespace Bcf.Tests.ControllersTests.PlayersControllerTests
             EditPlayerViewModel model = new EditPlayerViewModel() { Id = PlayerOne.Id };
 
             // Act
-            IActionResult result = await PlayersControllerTest.Edit(PlayerOne.Id, model);
+            IActionResult result = await PlayerControllerTests.Edit(PlayerOne.Id, model);
 
             MockRepo.Verify(mock => mock.UpdateAsync(It.IsAny<Player>()), Times.Once);
         }
@@ -151,7 +153,7 @@ namespace Bcf.Tests.ControllersTests.PlayersControllerTests
             Player player = new Player() { Id = PlayerOne.Id, FirstName = nameof(Edit_Post_ShouldCall_UpdateAsync_WithCorrectParameter_IfModelIsValid) };
             EditPlayerViewModel model = new EditPlayerViewModel() { Id = player.Id, FirstName = player.FirstName };
 
-            await PlayersControllerTest.Edit(player.Id, model);
+            await PlayerControllerTests.Edit(player.Id, model);
 
             MockRepo.Verify(mock => mock.UpdateAsync(It.Is<Player>(p => p.FirstName.Equals(player.FirstName) && p.Id.Equals(player.Id))), Times.Once);
         }

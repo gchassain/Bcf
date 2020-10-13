@@ -1,5 +1,4 @@
-﻿@using Bcf.ViewModels
-@model IEnumerable<IndexPlayerViewModel>
+﻿@model Bcf.ViewModels.IndexViewModel
 
 @{
     ViewData["Title"] = "Index";
@@ -10,8 +9,11 @@
         <span class="bcf-title">JOUEURS</span>
     </div>
     <div class="col-6 text-right">
-        <form asp-controller="Players" asp-action="Index" method="get" class="bcf-search-input">
+        <form asp-controller="Player" asp-action="Index" method="get" class="bcf-search-input">
             <input type="text" name="SearchString" placeholder="Rechercher par nom">
+            <select asp-for="PlayerTeam" asp-items="Model.Teams">
+                <option value="" class="custom-select-lg"></option>
+            </select>
             <input type="submit" value="Filtrer" />
         </form>
     </div>
@@ -22,39 +24,38 @@
         <thead>
             <tr class="table-info">
                 <th>
-                    @Html.DisplayNameFor(model => model.LastName)
+                    @Html.DisplayNameFor(model => model.PlayersVM[0].LastName)
                 </th>
                 <th>
-                    @Html.DisplayNameFor(model => model.Number)
+                    @Html.DisplayNameFor(model => model.PlayersVM[0].Number)
                 </th>
                 <th>
-                    @Html.DisplayNameFor(model => model.Position)
+                    @Html.DisplayNameFor(model => model.PlayersVM[0].Position)
                 </th>
                 <th>
-                    @Html.DisplayNameFor(model => model.Height)
+                    @Html.DisplayNameFor(model => model.PlayersVM[0].Height)
                 </th>
                 <th>
-                    @Html.DisplayNameFor(model => model.Weight)
+                    @Html.DisplayNameFor(model => model.PlayersVM[0].Weight)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.PlayersVM[0].NameOfTeam)
                 </th>
                 <th></th>
             </tr>
         </thead>
         <tbody>
-            @foreach (var player in Model)
+            @foreach (var player in Model.PlayersVM)
             {
                 <tr>
                     <td class="bcf-player-left">
-                        <a href="@Url.Action("Details", "Players", new { Id = player.Id })">
+                        <a href="@Url.Action("Details", "Player", new { Id = player.Id })">
                             <img src="@Url.Content("~/images/" + @player.ProfilePicture)" class="rounded-circle player-picture-thumb ng-isolate-scope" asp-append-version="true" />
                         </a>
-                        <a href="@Url.Action("Details", "Players", new { Id = player.Id })" class="bcf-player-name ng-isolate-scope">
+                        <a href="@Url.Action("Details", "Player", new { Id = player.Id })" class="bcf-player-name ng-isolate-scope">
                             @Html.DisplayFor(modelItem => player.FirstName)
                             @Html.DisplayFor(modelItem => player.LastName)
                         </a>
-                        @*
-        @Html.ActionLink(player.FirstName, "Details", "Players", new { Id = player.Id }, new { @class = "bcf-player-name ng-isolate-scope" })
-        @Html.ActionLink(player.LastName, "Details", "Players", new { Id = player.Id }, new { @class = "bcf-player-name ng-isolate-scope" })
-                        *@
                     </td>
                     <td class="bcf-player-left">
                         @Html.DisplayFor(modelItem => player.Number)
@@ -67,6 +68,9 @@
                     </td>
                     <td class="bcf-player-left">
                         @Html.DisplayFor(modelItem => player.Weight)
+                    </td>
+                    <td class="bcf-player-left">
+                        @Html.DisplayFor(modelItem => player.NameOfTeam)
                     </td>
                     <td class="bcf-player-left">
                         <div class="btn-group" role="group" aria-label="Options">

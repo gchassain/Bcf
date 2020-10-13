@@ -7,11 +7,11 @@ using System.Threading.Tasks;
 
 namespace Bcf.Data
 {
-    public class PlayerRepository : IPlayerRepository
+    public class BcfRepository : IBcfRepository
     {
         private readonly BcfContext _dbContext;
 
-        public PlayerRepository(BcfContext bcfContext)
+        public BcfRepository(BcfContext bcfContext)
         {
             _dbContext = bcfContext;
         }
@@ -42,24 +42,42 @@ namespace Bcf.Data
                 .FirstOrDefaultAsync(p => p.Id == id);
         }
 
-        public Task<List<Player>> ListAsync(string searchString)
+        public Task<List<Player>> ListPlayersAsync()
         {
             return _dbContext.Players
-                .Where(p => p.LastName.Contains(searchString) || p.FirstName.Contains(searchString))
                 .OrderBy(p => p.FirstName)
                 .ToListAsync();
         }
 
-        public Task SaveChangeAsync(List<Player> players)
+        public IQueryable<Player> ListPlayers()
         {
-            _dbContext.Players.AddRange(players);
-            return _dbContext.SaveChangesAsync();
+            return _dbContext.Players;
         }
+
+        /*public Task SaveChangeAsync(Player player)
+        {
+            _dbContext.Players.Add(player);
+            return _dbContext.SaveChangesAsync();
+        }*/
 
         public Task UpdateAsync(Player player)
         {
             _dbContext.Entry(player).State = EntityState.Modified;
             return _dbContext.SaveChangesAsync();
+        }
+
+        public Task<List<Team>> ListTeamsAsync()
+        {
+            return _dbContext.Teams
+                .OrderBy(t => t.NameOfTeam)
+                .ToListAsync();
+        }
+
+        public IQueryable<Team> ListTeamsByPlayer()
+        {
+            return _dbContext.Players
+                .Select(p => p.Team)
+                .OrderBy(t => t.Id);
         }
     }
 }

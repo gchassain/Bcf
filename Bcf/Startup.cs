@@ -7,10 +7,6 @@ using Microsoft.EntityFrameworkCore;
 using Bcf.Data;
 using Bcf.Interfaces;
 using System;
-using System.Threading.Tasks;
-using Bcf.Models;
-using System.Linq;
-using System.Collections.Generic;
 
 namespace Bcf
 {
@@ -27,19 +23,17 @@ namespace Bcf
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddControllersWithViews();
-            services.AddDbContext<BcfContext>(options => options.UseSqlServer(Configuration.GetConnectionString("BcfContext")));
-            services.AddScoped<IPlayerRepository, PlayerRepository>();
+            services.AddDbContext<BcfContext>(options => options.UseLazyLoadingProxies()
+                                            .UseSqlServer(Configuration.GetConnectionString("BcfContext")));
+            services.AddScoped<IBcfRepository, BcfRepository>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, IServiceProvider serviceProvider)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
             if (env.IsDevelopment())
             {
-                //app.UseDeveloperExceptionPage();
-                IPlayerRepository repository = serviceProvider.GetRequiredService<IPlayerRepository>();
-
-                InitializeDatabaseAsync(repository).Wait();
+                app.UseDeveloperExceptionPage();
             }
             else
             {
@@ -60,48 +54,6 @@ namespace Bcf
                     name: "default",
                     pattern: "{controller=Home}/{action=Index}/{id?}");
             });
-        }
-
-        public async Task InitializeDatabaseAsync(IPlayerRepository repo)
-        {
-            List<Player> players = await repo.ListAsync("");
-
-            if (!players.Any())
-            {
-                await repo.SaveChangeAsync(GetPlayersTest());
-            }
-        }
-
-        public static List<Player> GetPlayersTest()
-        {
-            List<Player> players = new List<Player>
-            {
-                new Player()
-                {
-                    FirstName = "Michael",
-                    LastName = "Jordan",
-                    NickName = "His Airness",
-                    Height = 198,
-                    Weight = 98,
-                    BirthDate = new DateTime(1963, 02, 17),
-                    Number = 23,
-                    Position = Enums.PlayerPositionsEnum.SMALL_FORWARD,
-                    ProfilePicture = "michael-jordan.png"
-                },
-                new Player()
-                {
-                    FirstName = "LeBron",
-                    LastName = "James",
-                    NickName = "The king",
-                    Height = 206,
-                    Weight = 113,
-                    BirthDate = new DateTime(1984, 12, 30),
-                    Number = 23,
-                    Position = Enums.PlayerPositionsEnum.POWER_FORWARD,
-                    ProfilePicture = "lebron-james.png"
-                }
-            };
-            return players;
         }
     }
 }

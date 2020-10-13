@@ -1,5 +1,7 @@
 ﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using static Bcf.Models.Enums;
 
@@ -43,7 +45,9 @@ namespace Bcf.ViewModels
         [Display(Name = "Photo de profil")]
         public IFormFile ProfileImage { get; set; }
 
-        [Display(Name = "Joueur")]
-        public string FullName { get; set; }
+        [Display(Name = "Equipe")]
+        public int TeamId { get; set; }
+
+        public List<SelectListItem> Teams { get; set; }
     }
 }
